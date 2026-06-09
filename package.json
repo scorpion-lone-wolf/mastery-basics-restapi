@@ -2,9 +2,9 @@
   "name": "mastery-basics-restapi",
   "version": "1.0.0",
   "description": "This repo contains the basics of rest api using node js",
-  "main": "index.js",
+  "main": "server.ts",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.ts",
     "lint": "eslint ."
   },
@@ -21,14 +21,18 @@
   "homepage": "https://github.com/scorpion-lone-wolf/mastery-basics-restapi#readme",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.6",
     "@types/node": "^25.9.2",
     "eslint": "^10.4.1",
     "globals": "^17.6.0",
-    "jiti": "^2.7.0",
     "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.0"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "express": "^5.2.1"
   }
 }
