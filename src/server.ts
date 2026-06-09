@@ -1,7 +1,11 @@
 import app from "./app.ts";
+import { config } from "./config/config.ts";
+import connectToDB from "./config/db.ts";
 
-function startServer() {
-  const PORT = process.env.PORT || 3010;
+async function startServer() {
+  await connectToDB();
+  const PORT = config.port || 3000;
+
   app.listen(PORT, () => {
     console.log(`listening on port:${PORT}`);
   });
