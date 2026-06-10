@@ -1,8 +1,16 @@
-import { type Request, type Response } from "express";
+import { type NextFunction, type Request, type Response } from "express";
+import createHttpError from "http-errors";
 
-async function createUser(req: Request, res: Response) {
-  const body = req.body;
-  console.log("body", body);
+async function createUser(req: Request, res: Response, next: NextFunction) {
+  const { name, email, password }: { name: string; email: string; password: string } = req.body;
+  // validation
+  if (!name || !email || !password) {
+    const error = createHttpError(400, "All fields are required");
+    return next(error);
+  }
+  // logic
+  // sending response
+
   res.json({
     message: "user created",
   });

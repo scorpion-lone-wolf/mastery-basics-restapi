@@ -3,7 +3,7 @@ import globalErrorHandler from "./middlewares/globalErrorHandler.ts";
 import userRouter from "./users/users.routes.ts";
 
 const app = express();
-// middleware to inject body in req.body
+// middleware to help express to parse json
 app.use(express.json());
 
 // Routes
