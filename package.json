@@ -21,9 +21,11 @@
   "homepage": "https://github.com/scorpion-lone-wolf/mastery-basics-restapi#readme",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/bcrypt": "^6.0.0",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.6",
     "@types/http-errors": "^2.0.5",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/mongoose": "^5.11.96",
     "@types/node": "^25.9.2",
     "eslint": "^10.4.1",
@@ -34,9 +36,11 @@
     "typescript-eslint": "^8.61.0"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "http-errors": "^2.0.1",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.3"
   }
 }
