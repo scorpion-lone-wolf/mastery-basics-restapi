@@ -13,37 +13,49 @@ async function createUser(req: Request, res: Response, next: NextFunction) {
     return next(error);
   }
   //  database logic
-  const user = await UserModel.findOne({ email });
-  if (user) {
-    // user is already registered in our application
-    const error = createHttpError(400, "User already exists with this email");
-    return next(error);
+  try {
+    const user = await UserModel.findOne({ email });
+    if (user) {
+      // user is already registered in our application
+      const error = createHttpError(400, "User already exists with this email");
+      return next(error);
+    }
+  } catch (error) {
+    console.error(error);
+    return next(createHttpError(500, "Error while getting user"));
   }
+
   //   hashing password
   const hashedPassword = await bcrypt.hash(password, 10);
-  // store the name, email and hashedPassword to the database
-  const newUser = await UserModel.create({
-    name,
-    email,
-    password: hashedPassword,
-  });
-  // Token generation JWT
+  try {
+    // store the name, email and hashedPassword to the database
+    const newUser = await UserModel.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
 
-  const accessToken = jwt.sign(
-    {
-      sub: newUser._id,
-    },
-    config.jwtSecret as string,
-    {
-      expiresIn: "7d",
-    },
-  );
-  // sending response
-  res.status(201).json({
-    id: newUser._id,
-    access_token: accessToken,
-    message: "user created",
-  });
+    // Token generation JWT
+    const accessToken = jwt.sign(
+      {
+        sub: newUser._id,
+      },
+      config.jwtSecret as string,
+      {
+        expiresIn: "7d",
+      },
+    );
+
+    // sending response
+    res.status(201).json({
+      id: newUser._id,
+      access_token: accessToken,
+      message: "user created",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(createHttpError(500, "Unable to create user"));
+  }
 }
 
 export { createUser };
