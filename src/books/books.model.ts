@@ -15,11 +15,11 @@ const bookSchema = new mongoose.Schema<Book>(
       required: true,
       type: String,
     },
-    bookCoverImageURL: {
+    coverImage: {
       required: true,
       type: String,
     },
-    bookPdfURL: {
+    file: {
       required: true,
       type: String,
     },

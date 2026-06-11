@@ -5,6 +5,6 @@ export type Book = {
   title: string;
   author: User;
   genre: string;
-  bookCoverImageURL: string;
-  bookPdfURL: string;
+  coverImage: string;
+  file: string;
 };
