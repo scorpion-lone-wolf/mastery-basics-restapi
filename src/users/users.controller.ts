@@ -58,4 +58,45 @@ async function createUser(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export { createUser };
+async function loginUser(req: Request, res: Response, next: NextFunction) {
+  // get email and password from body
+  const { email, password } = req.body;
+  //   valdiation
+  if (!email || !password) {
+    const error = createHttpError(400, "Both email & password are required");
+    return next(error); // this will be handled by global error handler
+  }
+  try {
+    //   check if exist in our db or not
+    const retrivedUser = await UserModel.findOne({ email });
+    if (!retrivedUser) {
+      const error = createHttpError(404, "User not found");
+      return next(error); // this will be handled by global error handler
+    }
+    // validate the password after hashing with the retrivedUser hashsed password
+    const isPasswordMatched = await bcrypt.compare(password, retrivedUser.password);
+    if (!isPasswordMatched) {
+      const error = createHttpError(401, "Please enter valid Credientals");
+      return next(error); // this will be handled by global error handler
+    }
+    // generate the access token so that user can access protected route
+    const accessToken = jwt.sign(
+      {
+        sub: retrivedUser._id,
+      },
+      config.jwtSecret as string,
+      {
+        expiresIn: "7d",
+      },
+    );
+    return res.json({
+      message: "login successful",
+      accessToken,
+    });
+  } catch {
+    const err = createHttpError(500, "Unable to login user");
+    return next(err); // this will be handled by global error handler
+  }
+}
+
+export { createUser, loginUser };
