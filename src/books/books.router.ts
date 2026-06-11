@@ -9,7 +9,7 @@ const __dirname = import.meta.dirname;
 const upload = multer({
   dest: path.join(__dirname, "../../public/data/uploads"),
   limits: {
-    fieldSize: 5 * 1024 * 1024, // 5 MB
+    fieldSize: 10 * 1024 * 1024, // 10 MB
   },
 });
 
