@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Book } from "./book.types";
+import { type Book } from "./book.types.ts";
 
 const bookSchema = new mongoose.Schema<Book>(
   {
@@ -29,5 +29,4 @@ const bookSchema = new mongoose.Schema<Book>(
   },
 );
 
-const BookModel = mongoose.model<Book>("Book", bookSchema);
-export default BookModel;
+export const BookModel = mongoose.model<Book>("Book", bookSchema);

@@ -1,4 +1,4 @@
-import { User } from "../users/user.types";
+import { type User } from "../users/user.types.ts";
 
 export type Book = {
   _id: string;
