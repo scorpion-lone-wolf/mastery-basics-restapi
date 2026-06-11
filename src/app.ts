@@ -1,4 +1,5 @@
 import express, { type Request, type Response } from "express";
+import bookRouter from "./books/books.router.ts";
 import globalErrorHandler from "./middlewares/globalErrorHandler.ts";
 import userRouter from "./users/users.routes.ts";
 
@@ -12,6 +13,8 @@ app.get("/", (req: Request, res: Response) => {
 });
 // using users routes
 app.use("/api/users", userRouter);
+// using books routes
+app.use("/api/books", bookRouter);
 
 // Global error Handler (must be at last)
 app.use(globalErrorHandler);
