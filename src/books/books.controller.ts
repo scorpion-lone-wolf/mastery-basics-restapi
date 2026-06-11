@@ -1,11 +1,9 @@
 import { type NextFunction, type Request, type Response } from "express";
 import createHttpError from "http-errors";
 import fs from "node:fs/promises";
-import path from "node:path";
-import { cloudinary } from "../config/cloudinary.ts";
+import { uploadMediaToCloudinary } from "./book.helper.ts";
+import { type Book } from "./book.types.ts";
 import { BookModel } from "./books.model.ts";
-
-const __dirname = import.meta.dirname;
 
 type BookFiles = {
   coverImage?: Express.Multer.File[];
@@ -24,22 +22,15 @@ async function createBook(req: Request, res: Response, next: NextFunction) {
   }
   try {
     // 1. Upload Cover Image
-    const coverFileName = coverImage.filename;
-    const coverURLPath = path.join(__dirname, "../../public/data/uploads", coverFileName);
-    const coverUploadResult = await cloudinary.uploader.upload(coverURLPath, {
-      resource_type: "image",
-      filename_override: coverFileName,
-      folder: "book-cover",
-    });
+    const { response: coverUploadResult, fileURLPath: coverURLPath } =
+      await uploadMediaToCloudinary(coverImage, "image", "book-cover");
 
     // 2. Upload book file (raw) -> pdf
-    const fileName = file.filename;
-    const fileURLPath = path.join(__dirname, "../../public/data/uploads", fileName);
-    const fileUploadResult = await cloudinary.uploader.upload(fileURLPath, {
-      resource_type: "raw", // This is needed to upload file other then image and video
-      filename_override: fileName,
-      folder: "book",
-    });
+    const { response: fileUploadResult, fileURLPath } = await uploadMediaToCloudinary(
+      file,
+      "raw",
+      "book",
+    );
 
     // get the userid
     const userId = req.user?.sub as string;
@@ -54,7 +45,7 @@ async function createBook(req: Request, res: Response, next: NextFunction) {
     // 4. Delete temp files , if fail log the error
     await Promise.all([
       fs.unlink(coverURLPath).catch((err) => {
-        console.log("failed to unline cover image", err);
+        console.log("failed to unlink cover image", err);
       }),
       fs.unlink(fileURLPath).catch((err) => {
         console.log("failed to unlink file", err);
@@ -71,4 +62,84 @@ async function createBook(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export { createBook };
+async function updateBook(req: Request, res: Response, next: NextFunction) {
+  try {
+    //   get the book id that need to be patch
+    const bookId = req.params.id;
+    if (!bookId || Array.isArray(bookId)) {
+      return next(createHttpError(400, "Book id is required"));
+    }
+
+    try {
+      const book = await BookModel.findOne({
+        _id: bookId,
+      });
+      if (!book) {
+        return next(createHttpError(404, "Book not found!"));
+      }
+      const userId = req.user?.sub;
+      if (!userId) {
+        return next(createHttpError(403, "You are not authorized to update this book"));
+      }
+      // check if the author who created is the book and trying to update are same
+      if (book.author.toString() !== userId) {
+        return next(createHttpError(403, "You are not authorized to update this book"));
+      }
+    } catch {
+      return next(createHttpError(400, "Invalid id"));
+    }
+
+    const { title, genre } = req.body ?? {};
+
+    const files = req.files as BookFiles | undefined;
+
+    const coverImage = files?.coverImage?.[0];
+    const file = files?.file?.[0];
+    //   only update the fields that are passed by the user
+    const updatedBookObj: Partial<Book> = {};
+    if (title) updatedBookObj.title = title;
+    if (genre) updatedBookObj.genre = genre;
+
+    if (coverImage) {
+      const { response: coverUploadResult, fileURLPath: coverURLPath } =
+        await uploadMediaToCloudinary(coverImage, "image", "book-cover");
+      await fs.unlink(coverURLPath).catch((err) => {
+        console.log("failed to unlink cover image", err);
+      });
+      updatedBookObj.coverImage = coverUploadResult.secure_url;
+    }
+    if (file) {
+      const { response: fileUploadResult, fileURLPath } = await uploadMediaToCloudinary(
+        file,
+        "raw",
+        "book",
+      );
+      await fs.unlink(fileURLPath).catch((err) => {
+        console.log("failed to unlink file", err);
+      });
+      updatedBookObj.file = fileUploadResult.secure_url;
+    }
+
+    if (Object.keys(updatedBookObj).length === 0) {
+      // preventing empty update
+      return next(createHttpError(400, "No update field provided"));
+    }
+
+    await BookModel.updateOne(
+      {
+        _id: bookId,
+      },
+      { ...updatedBookObj },
+    );
+    return res.status(200).json({
+      message: "Update successfully",
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      return next(createHttpError(500, error.message));
+    }
+    console.error(error);
+  }
+}
+
+export { createBook, updateBook };

@@ -6,7 +6,7 @@ export default function globalErrorHandler(
   error: HttpError,
   req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ) {
   const statusCode: number = error.statusCode || 500;
 

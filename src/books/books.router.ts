@@ -3,7 +3,7 @@ import createHttpError from "http-errors";
 import multer, { type FileFilterCallback } from "multer";
 import path from "node:path";
 import validateAuth from "../middlewares/authenticate.ts";
-import { createBook } from "./books.controller.ts";
+import { createBook, updateBook } from "./books.controller.ts";
 
 const bookRouter = express.Router();
 const __dirname = import.meta.dirname;
@@ -52,6 +52,15 @@ bookRouter.post(
     { name: "file", maxCount: 1 },
   ]),
   createBook,
+);
+bookRouter.patch(
+  "/:id",
+  validateAuth,
+  upload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "file", maxCount: 1 },
+  ]),
+  updateBook,
 );
 
 export default bookRouter;
