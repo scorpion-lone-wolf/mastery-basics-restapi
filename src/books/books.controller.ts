@@ -41,11 +41,13 @@ async function createBook(req: Request, res: Response, next: NextFunction) {
       folder: "book",
     });
 
+    // get the userid
+    const userId = req.user?.sub as string;
     // 3. Create database record
     const newBook = await BookModel.create({
       title,
       genre,
-      author: { _id: "6a2965160802bbad1f3c89b3" },
+      author: { _id: userId },
       coverImage: coverUploadResult.secure_url,
       file: fileUploadResult.secure_url,
     });

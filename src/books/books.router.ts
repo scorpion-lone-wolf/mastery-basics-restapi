@@ -2,6 +2,7 @@ import express, { type Request } from "express";
 import createHttpError from "http-errors";
 import multer, { type FileFilterCallback } from "multer";
 import path from "node:path";
+import validateAuth from "../middlewares/authenticate.ts";
 import { createBook } from "./books.controller.ts";
 
 const bookRouter = express.Router();
@@ -45,6 +46,7 @@ const upload = multer({
 // routes
 bookRouter.post(
   "/",
+  validateAuth,
   upload.fields([
     { name: "coverImage", maxCount: 1 },
     { name: "file", maxCount: 1 },
