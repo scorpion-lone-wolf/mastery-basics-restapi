@@ -13,7 +13,7 @@ export async function uploadMediaToCloudinary(
     resource_type: resourceType,
     filename_override: fileName,
     folder,
-    format: resourceType === "raw" ? "pdf" : "auto",
+    format: resourceType === "raw" ? "pdf" : "",
   });
   return { response, fileURLPath };
 }

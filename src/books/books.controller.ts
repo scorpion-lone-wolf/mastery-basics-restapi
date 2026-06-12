@@ -1,6 +1,7 @@
 import { type NextFunction, type Request, type Response } from "express";
 import createHttpError from "http-errors";
 import fs from "node:fs/promises";
+import { cloudinary } from "../config/cloudinary.ts";
 import { uploadMediaToCloudinary } from "./book.helper.ts";
 import { type Book } from "./book.types.ts";
 import { BookModel } from "./books.model.ts";
@@ -56,7 +57,8 @@ async function createBook(req: Request, res: Response, next: NextFunction) {
       message: "Book created successfully",
       id: newBook._id,
     });
-  } catch {
+  } catch (err) {
+    console.log(err);
     const error = createHttpError(500, "Unable to upload files");
     return next(error);
   }
@@ -197,9 +199,25 @@ async function deleteBook(req: Request, res: Response, next: NextFunction) {
     if (book.author.toString() != req.user?.sub) {
       return next(createHttpError(401, "Not Authorized to delete this book"));
     }
+    // book-cover/gytvczbmjqoupe1t43se
+    // https://res.cloudinary.com/dbswtcgip/image/upload/v1781197721/book-cover/gytvczbmjqoupe1t43se.jpg
+    const coverFileSplits = book.coverImage.split("/");
+    const coverImagePublicId =
+      coverFileSplits.at(-2) + "/" + coverFileSplits.at(-1)?.split(".").at(0);
+
+    const bookFileSplits = book.file.split("/");
+    const bookFilePublicId = bookFileSplits.at(-2) + "/" + bookFileSplits.at(-1);
+    console.log("bookFilePublicId", bookFilePublicId);
+    await cloudinary.uploader.destroy(coverImagePublicId, {
+      resource_type: "image",
+    });
+    await cloudinary.uploader.destroy(bookFilePublicId, {
+      resource_type: "raw",
+    });
 
     const result = await BookModel.deleteOne({ _id: id });
-    return res.json({
+
+    return res.status(204).json({
       message: "Deleted successfully",
       result,
     });
