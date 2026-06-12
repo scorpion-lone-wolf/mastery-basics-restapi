@@ -167,4 +167,20 @@ async function fetchAllBook(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export { createBook, fetchAllBook, updateBook };
+async function fetchBook(req: Request, res: Response, next: NextFunction) {
+  try {
+    const bookId = req.params.id as string;
+    // check if book id os present in db or not
+    const book = await BookModel.find({ _id: bookId });
+    if (!book) {
+      return next(createHttpError(404, "Book not found"));
+    }
+    return res.json({
+      result: book,
+    });
+  } catch {
+    return next(createHttpError(500, "Unable to get book"));
+  }
+}
+
+export { createBook, fetchAllBook, fetchBook, updateBook };
