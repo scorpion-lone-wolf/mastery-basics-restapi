@@ -3,7 +3,7 @@ import createHttpError from "http-errors";
 import multer, { type FileFilterCallback } from "multer";
 import path from "node:path";
 import validateAuth from "../middlewares/authenticate.ts";
-import { createBook, updateBook } from "./books.controller.ts";
+import { createBook, fetchAllBook, updateBook } from "./books.controller.ts";
 
 const bookRouter = express.Router();
 const __dirname = import.meta.dirname;
@@ -62,5 +62,7 @@ bookRouter.patch(
   ]),
   updateBook,
 );
+// this will be publicly accesable
+bookRouter.get("/", fetchAllBook);
 
 export default bookRouter;

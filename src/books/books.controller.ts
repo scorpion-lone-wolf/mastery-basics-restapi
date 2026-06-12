@@ -142,4 +142,29 @@ async function updateBook(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export { createBook, updateBook };
+async function fetchAllBook(req: Request, res: Response, next: NextFunction) {
+  try {
+    // get page and limit (if not send then default set page=1 and limit=10)
+    const page = Number(req.query?.page) || 1;
+    const limit = Number(req.query?.limit) || 10;
+
+    const offset = page * limit - limit;
+    const [book, count] = await Promise.all([
+      BookModel.find({}).skip(offset).limit(limit),
+      BookModel.countDocuments(),
+    ]);
+
+    return res.json({
+      result: book,
+      meta: {
+        page: page,
+        limit: limit,
+        total: count,
+      },
+    });
+  } catch {
+    return next(createHttpError(500, "Error while getting a book"));
+  }
+}
+
+export { createBook, fetchAllBook, updateBook };
