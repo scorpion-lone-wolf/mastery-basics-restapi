@@ -3,7 +3,7 @@ import createHttpError from "http-errors";
 import multer, { type FileFilterCallback } from "multer";
 import path from "node:path";
 import validateAuth from "../middlewares/authenticate.ts";
-import { createBook, fetchAllBook, fetchBook, updateBook } from "./books.controller.ts";
+import { createBook, deleteBook, fetchAllBook, fetchBook, updateBook } from "./books.controller.ts";
 
 const bookRouter = express.Router();
 const __dirname = import.meta.dirname;
@@ -42,8 +42,11 @@ const upload = multer({
   },
   fileFilter: bookUploadFilter,
 });
-
+// =======
 // routes
+// =======
+
+// Create book
 bookRouter.post(
   "/",
   validateAuth,
@@ -53,6 +56,7 @@ bookRouter.post(
   ]),
   createBook,
 );
+// Update book
 bookRouter.patch(
   "/:id",
   validateAuth,
@@ -62,9 +66,12 @@ bookRouter.patch(
   ]),
   updateBook,
 );
-// this will be publicly accesable
+// Get list of books
 bookRouter.get("/", fetchAllBook);
-
+// Get single book
 bookRouter.get("/:id", fetchBook);
+
+// Delete book
+bookRouter.delete("/:id", validateAuth, deleteBook);
 
 export default bookRouter;
